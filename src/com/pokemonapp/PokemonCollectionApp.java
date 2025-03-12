@@ -4,6 +4,9 @@ import com.pokemonapp.Factory.MapFactory;
 import com.pokemonapp.Model.Pokemon;
 import com.pokemonapp.Service.PokemonService;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -14,6 +17,8 @@ public class PokemonCollectionApp {
         int choice = scanner.nextInt();
 
         Map<String, Pokemon> pokemonMap = MapFactory.getMap(choice);
+        loadPokemonData(pokemonMap);
+
         PokemonService service = new PokemonService(pokemonMap);
 
         while (true) {
@@ -49,6 +54,26 @@ public class PokemonCollectionApp {
                 default:
                     System.out.println("Opción no válida");
             }
+        }
+    }
+
+    private static void loadPokemonData(Map<String, Pokemon> pokemonMap) {
+        String filePath = "pokemon_data_pokeapi.csv";
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            br.readLine(); // Saltar encabezado
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length >= 3) {
+                    String name = data[0];
+                    String type1 = data[1];
+                    String ability = data[2];
+                    pokemonMap.put(name, new Pokemon(name, type1, ability));
+                }
+            }
+            System.out.println("Datos de Pokémon cargados correctamente.");
+        } catch (IOException e) {
+            System.err.println("Error al leer el archivo CSV: " + e.getMessage());
         }
     }
 }
